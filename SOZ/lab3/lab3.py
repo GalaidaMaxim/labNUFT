@@ -1,6 +1,11 @@
 from telethon.sync import TelegramClient, events
 from telethon.tl.functions.channels import GetFullChannelRequest
+import seaborn as sns
+import matplotlib.pyplot as plt
+import pandas as pd
 import re
+import requests
+from bs4 import BeautifulSoup
 
 print("Кучерявий Максим КН-1-3М лабораторна 3")
 
@@ -29,28 +34,28 @@ with TelegramClient('name', 22845409, '89cd9a726ee1fc1c7835d361cd7f65ae') as cli
 
 
 # зчитування власного каналу
-    # print(f'ID: {channel.id}')
-    # print(f'Username: {channel.username}')
-    # print(f'Назва (заголовок): {channel.title}')
-    # print(f'Дата створення: {channel.date}')
+    print(f'ID: {channel.id}')
+    print(f'Username: {channel.username}')
+    print(f'Назва (заголовок): {channel.title}')
+    print(f'Дата створення: {channel.date}')
 
-    # fullText = ""
+    fullText = ""
 
-    # for msg in client.iter_messages(channel, limit=5):
-    #     text = msg.text or ''
-    #     datetime_str = msg.date.strftime('%Y-%m-%d %H:%M:%S')
-    #     char_count = len(text)
-    #     word_count = len(text.split())
-    #     fullText += f'{datetime_str} {text}\n\n'
+    for msg in client.iter_messages(channel, limit=5):
+        text = msg.text or ''
+        datetime_str = msg.date.strftime('%Y-%m-%d %H:%M:%S')
+        char_count = len(text)
+        word_count = len(text.split())
+        fullText += f'{datetime_str} {text}\n\n'
 
-    #     print(f'Дата і час: {datetime_str}')
-    #     print(f'Зміст: {text}')
-    #     print(f'Кількість символів: {char_count}')
-    #     print(f'Кількість слів: {word_count}')
-    #     print("---------------------------------")
+        print(f'Дата і час: {datetime_str}')
+        print(f'Зміст: {text}')
+        print(f'Кількість символів: {char_count}')
+        print(f'Кількість слів: {word_count}')
+        print("---------------------------------")
 
-    # file = open("./text.txt", 'w', encoding='utf-8')
-    # file.write(fullText)
+    file = open("./text.txt", 'w', encoding='utf-8')
+    file.write(fullText)
 
 
     infoChnal = client.get_entity('t.me/kn_nuft_tg')
@@ -77,3 +82,55 @@ with TelegramClient('name', 22845409, '89cd9a726ee1fc1c7835d361cd7f65ae') as cli
         else:
             arr.append(formatWepon(line))
     print(arr)
+
+    df = pd.DataFrame(arr)
+
+    plt.figure(figsize=(12, 6))
+    sns.barplot(data=df, x="name", y="speed", palette="viridis")
+
+    plt.xticks(rotation=45, ha='right')
+
+    plt.title("Швидкість кулі у різних моделях зброї")
+    plt.xlabel("Модель зброї")
+    plt.ylabel("Швидкість (м/с)")
+    plt.tight_layout()
+
+    plt.show()
+
+
+# HTML парсинг
+    response = requests.get('http://pol.ho.ua/soz2025.htm')
+    html = response.text
+    htmlText = BeautifulSoup(html, 'html.parser')
+    print("html текст")
+    print(htmlText)
+    print("\n\n")
+    print("підкреслений текст")
+    for text in htmlText.find_all('u'):
+        print(text.get_text(strip=True))
+    print("\n\n")
+
+    cellText = []
+    headers = []
+    result = []
+    for table in htmlText.find_all('table'):
+        if "Кучерявий" in table.get_text():
+            for row in table.find_all('tr'):
+                for cell in row.find_all(['td', 'th']):
+                    text = cell.get_text(strip=True)
+                    if text != "":
+                        cellText.append(text)
+                for header in row.find_all('strong'):
+                    headers.append(header.get_text(strip=True))
+    print("Всі комірки")
+    print(cellText)
+    print("\n\n")
+
+    for text in cellText:
+        if not text in headers:
+            result.append(text)
+    
+    print("Всі комірки без заголовків")
+    print(result)
+    print("\n\n")
+
