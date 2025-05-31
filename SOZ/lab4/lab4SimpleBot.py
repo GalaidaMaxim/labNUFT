@@ -1,6 +1,5 @@
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
-import chatterbot_corpus
 
 
 small_talk = [
